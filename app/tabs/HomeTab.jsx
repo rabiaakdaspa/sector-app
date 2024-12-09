@@ -1,6 +1,6 @@
 import React, { useContext, useEffect, useState } from "react";
 import { StyleSheet, TouchableOpacity, View, Text } from "react-native";
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons } from "@expo/vector-icons";
 import { useCameraPermissions, Camera, CameraView } from "expo-camera";
 import Toast from "react-native-toast-message";
 import { UserContext } from "../contexts/UserContext";
@@ -18,29 +18,28 @@ export default function HomeTab({ logout }) {
   const [camdata, setCamdata] = useState("");
   const [newCampaignCount, setNewCampaignCount] = useState(3); // Yeni eklenen kampanya sayısı
 
-  const [messageCount, setMessageCount] = useState(2)
-
+  const [messageCount, setMessageCount] = useState(2);
 
   const isPermissionGranted = Boolean(permission?.granted);
   const { fetchUserData, user } = useContext(UserContext);
 
-
   useEffect(() => {
-
-  }, [user])
-
+    console.log(user);
+    console.log("user role");
+    console.log(user?.role);
+  }, [user]);
 
   const handleOpenCamera = async () => {
     if (isPermissionGranted) {
       setCameraVisible(true);
     } else {
       const { status } = await requestPermission();
-      if (status === 'granted') {
+      if (status === "granted") {
         setCameraVisible(true);
       } else {
         Toast.show({
-          text1: 'Kamera izni gerekli',
-          type: 'error',
+          text1: "Kamera izni gerekli",
+          type: "error",
         });
       }
     }
@@ -56,41 +55,43 @@ export default function HomeTab({ logout }) {
     const res = await scanDealer(data);
     if (res.status === false) {
       Toast.show({
-        text2: 'Okuma işlemi basarisiz',
+        text2: "Okuma işlemi basarisiz",
         text1: `${res.message}`,
-        type: 'error',
+        type: "error",
       });
     }
 
     if (res.status === true) {
       Toast.show({
-        text2: 'Okuma işlemi başarılı',
+        text2: "Okuma işlemi başarılı",
         text1: `${res.message}`,
-        type: 'success',
+        type: "success",
       });
-    }  
+    }
 
     fetchUserData();
   };
 
   return (
-    <Background style={[styles.container, { backgroundColor: colors.background }]}>
-         {cameraVisible ? (
+    <Background
+      style={[styles.container, { backgroundColor: colors.background }]}
+    >
+      {cameraVisible ? (
         <CameraView
-        barcodeScannerSettings={{
-          barcodeTypes: ["qr"],
-        }}
+          barcodeScannerSettings={{
+            barcodeTypes: ["qr"],
+          }}
           style={styles.camera}
-          onBarcodeScanned= { ({ data }) => {
-            readScan(data)
-          //  showToast()
+          onBarcodeScanned={({ data }) => {
+            readScan(data);
+            //  showToast()
             setCameraVisible(false); // Kamera QR kod okunduktan sonra kapanacak
           }}
           ratio="16:9"
         >
           <View style={styles.cameraContainer}>
-            <TouchableOpacity 
-              style={styles.closeButton} 
+            <TouchableOpacity
+              style={styles.closeButton}
               onPress={() => setCameraVisible(false)}
             >
               <Text style={styles.closeButtonText}>Kapat </Text>
@@ -98,46 +99,108 @@ export default function HomeTab({ logout }) {
           </View>
         </CameraView>
       ) : (
-        <View style={[styles.homeContainer, { backgroundColor: colors.background }]}>
+        <View
+          style={[styles.homeContainer, { backgroundColor: colors.background }]}
+        >
           <View style={styles.buttonContainer}>
-            <Card style={styles.card}>
-              <TouchableOpacity onPress={handleOpenCamera} style={styles.touchable}>
-                <Ionicons name="qr-code-outline" size={28} color={colors.primary} />
-                <Paragraph style={styles.paragraph}>QR Tarayıcı</Paragraph>
-              </TouchableOpacity>
-            </Card>
+            {user?.role == 2 && (
+              <Card style={styles.card}>
+                <TouchableOpacity
+                  onPress={handleOpenCamera}
+                  style={styles.touchable}
+                >
+                  <Ionicons
+                    name="qr-code-outline"
+                    size={28}
+                    color={colors.primary}
+                  />
+                  <Paragraph style={styles.paragraph}>QR Tarayıcı</Paragraph>
+                </TouchableOpacity>
+              </Card>
+            )}
+
+            {user?.role == 1 && (
+              <Card style={styles.card}>
+                <TouchableOpacity
+                onPress={() => navigation.navigate("TransactionHistoryScreen")}
+                  style={styles.touchable}
+                >
+                  <Ionicons
+                    name="cash-outline"
+                    size={28}
+                    color={colors.primary}
+                  />
+                  <Paragraph style={styles.paragraph}>Satışlar</Paragraph>
+                </TouchableOpacity>
+              </Card>
+            )}
 
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('ProductsScreen')} style={styles.touchable}>
-                <Ionicons name="pricetag-outline" size={28} color={colors.primary} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("ProductsScreen")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="pricetag-outline"
+                  size={28}
+                  color={colors.primary}
+                />
                 <Paragraph style={styles.paragraph}>Ürünler</Paragraph>
               </TouchableOpacity>
             </Card>
 
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('CommissionHistory')} style={styles.touchable}>
-                <Ionicons name="receipt-outline" size={28} color={colors.primary} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("CommissionHistory")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="receipt-outline"
+                  size={28}
+                  color={colors.primary}
+                />
                 <Paragraph style={styles.paragraph}>QR Geçmişi</Paragraph>
               </TouchableOpacity>
             </Card>
 
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('PaymentScreen')} style={styles.touchable}>
-                <Ionicons name="card-outline" size={28} color={colors.primary} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("PaymentScreen")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="card-outline"
+                  size={28}
+                  color={colors.primary}
+                />
                 <Paragraph style={styles.paragraph}>Ödeme Al</Paragraph>
               </TouchableOpacity>
             </Card>
 
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('CommissionHistory')} style={styles.touchable}>
-                <Ionicons name="newspaper-outline" size={28} color={colors.primary} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("CommissionHistory")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="newspaper-outline"
+                  size={28}
+                  color={colors.primary}
+                />
                 <Paragraph style={styles.paragraph}>Ödeme Geçmişi</Paragraph>
               </TouchableOpacity>
             </Card>
 
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('CampaignsScreen')} style={styles.touchable}>
-                <Ionicons name="megaphone-outline" size={28} color={newCampaignCount > 0 ? colors.error : colors.primary} />
+              <TouchableOpacity
+                onPress={() => navigation.navigate("CampaignsScreen")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="megaphone-outline"
+                  size={28}
+                  color={newCampaignCount > 0 ? colors.error : colors.primary}
+                />
                 <Paragraph style={styles.paragraph}>Kampanyalar</Paragraph>
                 {newCampaignCount > 0 && (
                   <View style={styles.badge}>
@@ -147,12 +210,24 @@ export default function HomeTab({ logout }) {
               </TouchableOpacity>
             </Card>
 
-
             <Card style={styles.card}>
-              <TouchableOpacity onPress={() => navigation.navigate('CampaignsScreen')} style={styles.touchable}>
-              {messageCount > 0 
-              ? ( <Ionicons name="mail-unread-outline" size={28} color={colors.error} />) 
-              : ( <Ionicons name="mail-outline" size={28} color={colors.primary} />)   }
+              <TouchableOpacity
+                onPress={() => navigation.navigate("CampaignsScreen")}
+                style={styles.touchable}
+              >
+                {messageCount > 0 ? (
+                  <Ionicons
+                    name="mail-unread-outline"
+                    size={28}
+                    color={colors.error}
+                  />
+                ) : (
+                  <Ionicons
+                    name="mail-outline"
+                    size={28}
+                    color={colors.primary}
+                  />
+                )}
                 <Paragraph style={styles.paragraph}>Destek Talepleri</Paragraph>
                 {messageCount > 0 && (
                   <View style={styles.badge}>
@@ -162,6 +237,21 @@ export default function HomeTab({ logout }) {
               </TouchableOpacity>
             </Card>
 
+            {user?.role == 2 && (
+              <Card style={styles.card}>
+              <TouchableOpacity
+                onPress={() => navigation.navigate("FarmerFormScreen")}
+                style={styles.touchable}
+              >
+                <Ionicons
+                  name="person-outline"
+                  size={28}
+                  color={colors.primary}
+                />
+                <Paragraph style={styles.paragraph}>ÇKS</Paragraph>
+                </TouchableOpacity>
+              </Card>
+            )}
           </View>
         </View>
       )}
@@ -172,10 +262,10 @@ export default function HomeTab({ logout }) {
 const styles = StyleSheet.create({
   container: {
     padding: 0,
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
   },
   homeContainer: {
     width: "95%",
@@ -183,38 +273,38 @@ const styles = StyleSheet.create({
     display: "flex",
   },
   buttonContainer: {
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    flexWrap: 'wrap',
-    width: '100%',
+    flexDirection: "row",
+    justifyContent: "space-around",
+    flexWrap: "wrap",
+    width: "100%",
   },
   camera: {
     flex: 1,
-    width: '100%',
+    width: "100%",
   },
   cameraContainer: {
     flex: 1,
-    justifyContent: 'flex-end',
-    alignItems: 'center',
+    justifyContent: "flex-end",
+    alignItems: "center",
   },
   closeButton: {
-    backgroundColor: 'white',
+    backgroundColor: "white",
     padding: 10,
     borderRadius: 5,
     margin: 20,
   },
   closeButtonText: {
     fontSize: 16,
-    color: 'black',
+    color: "black",
   },
   frame: {
-    position: 'absolute',
-    top: '30%',
-    left: '15%',
-    width: '70%',
-    height: '40%',
+    position: "absolute",
+    top: "30%",
+    left: "15%",
+    width: "70%",
+    height: "40%",
     borderWidth: 3,
-    borderColor: 'rgba(255, 255, 255, 0.8)',
+    borderColor: "rgba(255, 255, 255, 0.8)",
     borderRadius: 10,
     zIndex: 1,
   },
@@ -222,35 +312,35 @@ const styles = StyleSheet.create({
     width: 100,
     height: 100,
     margin: 5,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     borderRadius: 10,
     elevation: 2,
   },
   touchable: {
-    justifyContent: 'center',
-    alignItems: 'center',
-    width: '100%',
-    height: '100%',
+    justifyContent: "center",
+    alignItems: "center",
+    width: "100%",
+    height: "100%",
   },
   paragraph: {
     marginTop: 8,
     fontSize: 12,
   },
   badge: {
-    position: 'absolute',
+    position: "absolute",
     right: -10,
     top: -5,
-    backgroundColor: 'red',
+    backgroundColor: "red",
     borderRadius: 10,
     width: 20,
     height: 20,
-    justifyContent: 'center',
-    alignItems: 'center',
+    justifyContent: "center",
+    alignItems: "center",
     zIndex: 10,
   },
   badgeText: {
-    color: 'white',
+    color: "white",
     fontSize: 12,
   },
 });

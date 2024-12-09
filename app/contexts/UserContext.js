@@ -1,7 +1,7 @@
 import React, { createContext, useEffect, useState } from 'react';
 import axios from 'axios';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import { getCommissionHistory, getUserData } from '../api/api';
+import { getCommissionHistory, getTransactionHistory, getUserData } from '../api/api';
 
 
 const defaultValue = null
@@ -15,6 +15,7 @@ const UserProvider = ({ children }) => {
   
   const [commissionHistoryList, setCommissionHistoryList] = useState([])
   const [paymentHistoryList, setPaymentHistoryList] = useState([])
+  const [transactionHistoryList, setTransactionHistoryList] = useState([])
 
   const [themeData, setThemeData] = useState(true);
 
@@ -46,6 +47,20 @@ const UserProvider = ({ children }) => {
     setUser((prevState) => ({ ...prevState, ...updatedUser }));
   };
 
+
+  const fetchUserTransactionHistory = async () => {
+    try {
+      const storedToken = await AsyncStorage.getItem('token');
+      if (storedToken) {
+        setToken(storedToken);
+        const response = await getTransactionHistory();
+        console.log(response)
+        setTransactionHistoryList(response.transactions);
+      }
+    } catch (error) {
+
+    }
+  }
 
   const fetchUserData = async () => {
     try {
@@ -122,7 +137,8 @@ const UserProvider = ({ children }) => {
   return (
     <UserContext.Provider value={{ user, updateUser, fetchUserData, loading, setLoading,
        saveToken, clearToken, token, setToken, saveToken, themeData, fetchUserCommissionHistory,
-       toggleTheme, setCommissionHistoryList, commissionHistoryList, fetchUserPaymentHistory, paymentHistoryList, setPaymentHistoryList
+       toggleTheme, setCommissionHistoryList, commissionHistoryList, fetchUserPaymentHistory, paymentHistoryList, setPaymentHistoryList,
+       fetchUserTransactionHistory, transactionHistoryList
       }}>
       {children}
     </UserContext.Provider>

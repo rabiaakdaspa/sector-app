@@ -18,6 +18,7 @@ export default function HomeScreen({ navigation }) {
 
   const getToken = async () => {
     const token = await AsyncStorage.getItem('token');
+    console.log(token);
     if (!token) {
       navigation.navigate("LoginScreen");
     }
@@ -29,6 +30,7 @@ export default function HomeScreen({ navigation }) {
   }, []);
 
   useEffect(() => {
+    console.log(user?.role);
     if (!user) {
       fetchUserData();
     }

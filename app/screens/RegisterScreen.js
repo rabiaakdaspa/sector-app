@@ -14,36 +14,61 @@ import { passwordValidator } from "../helpers/passwordValidator";
 import { nameValidator } from "../helpers/nameValidator";
 import { UserContext } from "../contexts/UserContext";
 import { register } from "../api/api";
+import Toast from "react-native-toast-message";
 
 export default function RegisterScreen({ navigation }) {
   const { colors } = useTheme();
   const [name, setName] = useState({ value: "", error: "" });
+  const [surname, setSurname] = useState({ value: "", error: "" });
   const [email, setEmail] = useState({ value: "", error: "" });
   const [password, setPassword] = useState({ value: "", error: "" });
-  const { loading, setLoading } = useContext(UserContext);
+  const [passwordRepeat, setPasswordRepeat] = useState({ value: "", error: "" });
+  const { loading, saveToken, clearToken, setLoading } = useContext(UserContext);
 
   const handleRegister = async () => {
     const nameError = nameValidator(name.value);
     const emailError = emailValidator(email.value);
     const passwordError = passwordValidator(password.value);
-    
-    if (nameError || emailError || passwordError) {
+    const passwordRepeatError = passwordValidator(passwordRepeat.value);
+    const surnameError = nameValidator(surname.value);
+    if (nameError || emailError || passwordError || passwordRepeatError || surnameError) {
       setName({ ...name, error: nameError });
       setEmail({ ...email, error: emailError });
       setPassword({ ...password, error: passwordError });
+      setPasswordRepeat({ ...passwordRepeat, error: passwordRepeatError });
+      setSurname({ ...surname, error: surnameError });
       return;
     }
     
     try {
       setLoading(true);
-      await register(name.value, email.value, password.value);
+      const res = await register(name.value, surname.value, email.value, password.value, passwordRepeat.value );
+      if (!res.status) {
+        Toast.show({
+          text2: res.messageTitle,
+          text1: res.message,
+          type: 'error',
+        });
+        return;
+      }
+  
+      saveToken(res.data);
+      Toast.show({
+        text2: res.messageTitle,
+        text1: res.message,
+        type: 'success',
+      });
+  
       navigation.reset({
         index: 0,
-        routes: [{ name: "LoginScreen" }],
-      });
+        routes: [{ name: "LoadingScreen" }],
+      }); 
     } catch (error) {
-      console.error('Kayıt hatası:', error);
-      setEmail({ ...email, error: "Kayıt başarısız. Lütfen bilgilerinizi kontrol edin." });
+      Toast.show({
+        text2: "Hata",
+        text1: error.message || "Bilinmeyen bir hata oluştu.",
+        type: 'error',
+      });
     } finally {
       setLoading(false);
     }
@@ -54,12 +79,20 @@ export default function RegisterScreen({ navigation }) {
       <Logo />
       <Header style={[styles.header, { color: colors.primary }]}>Kayıt Olun</Header>
       <TextInput
-        label="İsim"
+        label="Ad"
         returnKeyType="next"
         value={name.value}
         onChangeText={(text) => setName({ value: text, error: "" })}
         error={!!name.error}
         errorText={name.error}
+      />
+        <TextInput
+        label="Soyad"
+        returnKeyType="next"
+        value={surname.value}
+        onChangeText={(text) => setSurname({ value: text, error: "" })}
+        error={!!surname.error}
+        errorText={surname.error}
       />
       <TextInput
         label="E-posta"
@@ -80,6 +113,15 @@ export default function RegisterScreen({ navigation }) {
         onChangeText={(text) => setPassword({ value: text, error: "" })}
         error={!!password.error}
         errorText={password.error}
+        secureTextEntry
+      />
+        <TextInput
+        label="Şifre Tekrar "
+        returnKeyType="done"
+        value={passwordRepeat.value}
+        onChangeText={(text) => setPasswordRepeat({ value: text, error: "" })}
+        error={!!passwordRepeat.error}
+        errorText={passwordRepeat.error}
         secureTextEntry
       />
       <Button mode="contained" onPress={handleRegister} textColor={ colors.text } style={styles.button}>

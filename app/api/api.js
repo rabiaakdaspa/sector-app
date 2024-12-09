@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 // Axios yapılandırması
 const api = axios.create({
-  baseURL: 'http://192.168.1.113:8000/api',  // API adresinizi buraya ekleyin
+  baseURL: 'http://192.168.14.173:8000/api',  // API adresinizi buraya ekleyin
   headers: {
     'Content-Type': 'application/json',
   },
@@ -20,7 +20,7 @@ export const getUserData = async () => {
     return response.data
 
   } catch (error) {
-    throw error.message;
+    return error.message;
   }
 };
 
@@ -36,7 +36,7 @@ export const getCommissionHistory = async () => {
     return response.data
 
   } catch (error) {
-    throw error.message;
+    return error.message;
   }
 };
 
@@ -107,7 +107,11 @@ export const login = async (email, password) => {
     const token = response?.data.access_token;
 
     if (!token) {
-      throw new Error('Token alınamadı'); // Token yoksa hata fırlat
+     // throw new Error('Token alınamadı'); // Token yoksa hata fırlat
+
+      res.status = false;
+      res.messageTitle = "Server hatası"
+      res.message = "Serverda bir hata meydana geldi. Lütfen daha sonra tekrar deneyiniz."
     }
     if(token) {
       await AsyncStorage.setItem('token', token);
@@ -127,19 +131,98 @@ export const login = async (email, password) => {
 
       return res;
     }
-    
+
+    if(error.response.status == 422) {
+      res.status = false;
+      res.messageTitle = "Hatalı giriş"
+      res.message = "E-posta veya şifreniz hatalıdır."
+
+      return res;
+    }
   }
 };
 
 // Kayıt olma
-export const register = async (email, password) => {
+export const register = async (name, surname, email, password, passwordRepeat) => {
+  const res = {message: "", messageTitle: "", status: true, data: null};
   try {
-    const response = await api.post('/register', { email, password });
-    const { token } = response.data;
+    const response = await api.post('/register', { name: name, surname: surname, email: email, password: password, password_confirmation: passwordRepeat,role:2 });
+    console.log(response.data)
+    const token = response?.data.access_token;
     await AsyncStorage.setItem('token', token);  // Token'ı kaydetme
-    return response.data;
+
+    if (!token) {
+     // throw new Error('Token alınamadı'); // Token yoksa hata fırlat
+
+      res.status = false;
+      res.messageTitle = "Server hatası"
+      res.message = "Serverda bir hata meydana geldi. Lütfen daha sonra tekrar deneyiniz."
+    }
+    if(token) {
+      await AsyncStorage.setItem('token', token);
+
+    }
+    res.status = true;
+    res.messageTitle = "Başarılı";
+    res.message = "Başarılı bir şekilde giriş yaptınız."
+    res.data = token;
+
+    return res;
   } catch (error) {
-    throw error.response?.data || error.message;
+    if(error.status == 500) {
+      res.status = false;
+      res.messageTitle = "Server hatası"
+      res.message = "Serverda bir hata meydana geldi. Lütfen daha sonra tekrar deneyiniz."
+
+      return res;
+    }
+
+    if(error.response.status == 422) {
+      console.log(error.response.data.errors)
+
+      if(error.response.data.errors.email) {
+        res.status = false;
+        res.messageTitle = "Hatalı kayıt"
+        res.message = error.response.data.errors.email[0]
+        
+      return res;
+      }   
+
+      if(error.response.data.errors.password) {
+        res.status = false;
+        res.messageTitle = "Hatalı kayıt"
+        res.message = error.response.data.errors.password[0]
+        
+      return res;
+      }  
+
+      if(error.response.data.errors.password_confirmation) {
+        res.status = false;
+        res.messageTitle = "Hatalı kayıt"
+        res.message = error.response.data.errors.password_confirmation[0]
+        
+        return res;
+      }  
+
+      if(error.response.data.errors.name) {
+        res.status = false;
+        res.messageTitle = "Hatalı kayıt"
+        res.message = error.response.data.errors.name[0]
+        
+        return res;
+      }  
+
+      
+      if(error.response.data.errors.surname) {
+        res.status = false;
+        res.messageTitle = "Hatalı kayıt"
+        res.message = error.response.data.errors.surname[0]
+        
+        return res;
+      }  
+        
+
+    }
   }
 };
 
@@ -182,6 +265,22 @@ export const getPaymentHistory = async () => {
     const token = await AsyncStorage.getItem('token');  // Token'ı al
     if (token) {
       var response = await api.get('/payment-history', { headers: { Authorization: `Bearer ${token}` } });
+      console.log(response.data)
+    }
+
+    return response.data
+
+  } catch (error) {
+
+  }
+};
+
+export const getTransactionHistory = async () => {
+  const res = {data: null, }
+  try {
+    const token = await AsyncStorage.getItem('token');  // Token'ı al
+    if (token) {
+      var response = await api.get('/transactions/getUser', { headers: { Authorization: `Bearer ${token}` } });
       console.log(response.data)
     }
 

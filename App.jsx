@@ -21,6 +21,9 @@ import Toast from "react-native-toast-message";
 import ProductDetail from "./app/screens/ProductDetail";
 import CommissionHistoryScreen from "./app/screens/CommissionHistoryScreen";
 import PaymentScreen from "./app/screens/PaymentScreen";
+import TransactionHistoryScreen from "./app/screens/TransactionHistoryScreen";
+import CampaignsScreen from "./app/screens/CampaignsScreen";
+import FarmerFormScreen from "./app/screens/FarmerFormScreen";
 
 
 
@@ -57,9 +60,12 @@ const MainApp = () => {
           <Stack.Screen name="HomeScreen" component={HomeScreen} />
           <Stack.Screen name="LoadingScreen" component={LoadingScreen} />
           <Stack.Screen name="ProductsScreen" component={ProductsScreen} />
+          <Stack.Screen name="CampaignsScreen" component={CampaignsScreen} />
           <Stack.Screen name="ProductDetail" component={ProductDetail} />
 
           <Stack.Screen name="CommissionHistory" component={CommissionHistoryScreen} />
+          <Stack.Screen name="TransactionHistoryScreen" component={TransactionHistoryScreen} />
+          <Stack.Screen name="FarmerFormScreen" component={FarmerFormScreen} />
           <Stack.Screen name="PaymentScreen" component={PaymentScreen} />
 
           <Stack.Screen name="HomeTab" component={HomeTab} />
